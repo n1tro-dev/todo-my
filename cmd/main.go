@@ -2,7 +2,10 @@ package main
 
 import (
 	"log"
+	"os"
 
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq" //нужна чтобы определил драйвер postgres
 	"github.com/n1tro-dev/todo-my"
 	"github.com/n1tro-dev/todo-my/pkg/handler"
 	"github.com/n1tro-dev/todo-my/pkg/repository"
@@ -16,7 +19,24 @@ func main() {
 		log.Fatalf("error initializing configs: %s", err.Error())
 	}
 
-	rep := repository.NewRepository()
+	if err := godotenv.Load(); err != nil {
+		log.Fatalf("error  with data env: %s", err.Error())
+	}
+
+	db, err := repository.NewPostgresDB(repository.Config{
+		Host:     viper.GetString("db.host"),
+		Port:     viper.GetString("db.port"),
+		Username: viper.GetString("db.username"),
+		Password: os.Getenv("DB_PASSWORD"),
+		DBName:   viper.GetString("db.dbname"),
+		SSLMode:  viper.GetString("db.sslmode"),
+	})
+
+	if err != nil {
+		log.Fatalf("error with connection db: %s", err.Error())
+	}
+
+	rep := repository.NewRepository(db)
 	services := service.NewService(rep)
 	handlers := handler.NewHandler(services)
 
