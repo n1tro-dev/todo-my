@@ -21,20 +21,20 @@ type tokenClaims struct {
 	User_id int `json:"user_id"`
 }
 
-type AuthService struct {
-	repo repository.Authorizaton
+type AuthServise struct {
+	repo repository.Authorization
 }
 
-func NewAuthServise(repo repository.Authorizaton) *AuthService {
-	return &AuthService{repo: repo}
+func NewAuthServise(repo repository.Authorization) *AuthServise {
+	return &AuthServise{repo: repo}
 }
 
-func (s *AuthService) CreateUser(user todo.User) (int, error) {
+func (s *AuthServise) CreateUser(user todo.User) (int, error) {
 	user.Password = generatePasswordHash(user.Password)
 	return s.repo.CreateUser(user)
 }
 
-func (s *AuthService) GenerateToken(username, password string) (string, error) {
+func (s *AuthServise) GenerateToken(username, password string) (string, error) {
 
 	user, err := s.repo.GetUser(username, generatePasswordHash(password))
 	if err != nil {

@@ -5,7 +5,7 @@ import (
 	"github.com/n1tro-dev/todo-my"
 )
 
-type Authorizaton interface {
+type Authorization interface {
 	CreateUser(user todo.User) (int, error)
 	GetUser(username, password string) (todo.User, error)
 }
@@ -17,13 +17,13 @@ type TodoItem interface {
 }
 
 type Repository struct {
-	Authorizaton
+	Authorization
 	TodoList
 	TodoItem
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
-		Authorizaton: NewAuthPostgres(db),
+		Authorization: NewAuthPostgres(db),
 	}
 }
