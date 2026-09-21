@@ -1,17 +1,18 @@
 package service
 
-import "github.com/n1tro-dev/todo-my/pkg/repository"
+import (
+	"github.com/n1tro-dev/todo-my"
+	"github.com/n1tro-dev/todo-my/pkg/repository"
+)
 
 type Authorizaton interface {
-
+	CreateUser(user todo.User) (int, error)
 }
 
 type TodoList interface {
-
 }
 
 type TodoItem interface {
-
 }
 
 type Service struct {
@@ -20,6 +21,8 @@ type Service struct {
 	TodoItem
 }
 
-func NewService(repos *repository.Repository) *Service{
-	return &Service{}
+func NewService(repos *repository.Repository) *Service {
+	return &Service{
+		Authorizaton: NewAuthServise(repos.Authorizaton),
+	}
 }
