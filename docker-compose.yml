@@ -1,0 +1,16 @@
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: todo_db_container
+    environment:
+      - POSTGRES_DB=todo_db
+      - POSTGRES_USERNAME=postgres
+      - POSTGRES_PASSWORD=qwerty
+    ports:
+      - "5432:5432"
+      
+    volumes:
+      - todo_pgdata:/var/lib/postgresql/data
+volumes:
+  todo_pgdata:
