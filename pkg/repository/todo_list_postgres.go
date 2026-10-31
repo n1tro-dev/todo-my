@@ -2,9 +2,11 @@ package repository
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/n1tro-dev/todo-my"
+	"github.com/sirupsen/logrus"
 )
 
 type TodoListRepository struct {
@@ -63,4 +65,41 @@ func (r *TodoListRepository) GetById(userId, listId int) (todo.TodoList, error) 
 	err := r.db.Get(&list, query, userId, listId)
 
 	return list, err
+}
+
+func (r *TodoListRepository) Delete(userId, listId int) error {
+	query := fmt.Sprintf("DELETE FROM %s tl USING %s ul WHERE tl.id = ul.list_id AND ul.user_id=$1 AND ul.list_id=$2", todoListsTable, usersListsTable)
+
+	_, err := r.db.Exec(query, userId, listId)
+
+	return err
+}
+
+func (r *TodoListRepository) Update(userId, listId int, input todo.UpdateListInput) error {
+	setValues := make([]string, 0)
+	args := make([]interface{}, 0)
+	argsId := 1
+
+	if input.Title != nil {
+		setValues = append(setValues, fmt.Sprintf("title=$%d", argsId))
+		args = append(args, *input.Title)
+		argsId++
+	}
+
+	if input.Description != nil {
+		setValues = append(setValues, fmt.Sprintf("description=$%d", argsId))
+		args = append(args, *input.Description)
+		argsId++
+	}
+
+	setQuery := strings.Join(setValues, ", ")
+	query := fmt.Sprintf("UPDATE %s tl SET %s FROM %s ul WHERE tl.id=ul.list_id AND ul.list_id=$%d AND ul.user_id=$%d",
+		todoListsTable, setQuery, usersListsTable, argsId, argsId+1)
+	args = append(args, listId, userId)
+
+	logrus.Debugf("updateQuery: %s", query)
+	logrus.Debugf("args: %s", args)
+
+	_, err := r.db.Exec(query, args...)
+	return err
 }
