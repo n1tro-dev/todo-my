@@ -30,8 +30,8 @@ func (r *TodoItemPostgres) Create(listId int, item todo.TodoItem) (int, error) {
 		return 0, err
 	}
 
-	createListItemQuery := fmt.Sprintf("INSERT INTO %s (list_id, item_id) VALUES ($1, $2) RETURNING id", listsItemsTable)
-	_, err = r.db.Exec(createListItemQuery, listId, itemId)
+	createListItemQuery := fmt.Sprintf("INSERT INTO %s (list_id, item_id) VALUES ($1, $2)", listsItemsTable)
+	_, err = tx.Exec(createListItemQuery, listId, itemId)
 	if err != nil {
 		tx.Rollback()
 		return 0, err
@@ -42,7 +42,7 @@ func (r *TodoItemPostgres) Create(listId int, item todo.TodoItem) (int, error) {
 
 func (r *TodoItemPostgres) GetAll(userId, listId int) ([]todo.TodoItem, error) {
 	var items []todo.TodoItem
-	query := fmt.Sprintf(`SELECT ti.id, ti.title, ti.description ti.done FROM %s ti INNER JOIN %s li on li.item_id = ti.id
+	query := fmt.Sprintf(`SELECT ti.id, ti.title, ti.description, ti.done FROM %s ti INNER JOIN %s li on li.item_id = ti.id
 							INNER JOIN %s ul on ul.list_id = li.list_id WHERE li.list_id = $1 AND ul.user_id = $2`,
 		todoItemsTable, listsItemsTable, usersListsTable)
 
@@ -55,8 +55,8 @@ func (r *TodoItemPostgres) GetAll(userId, listId int) ([]todo.TodoItem, error) {
 
 func (r *TodoItemPostgres) GetById(userId, itemId int) (todo.TodoItem, error) {
 	var item todo.TodoItem
-	query := fmt.Sprintf(`SELECT ti.id, ti.title, ti.description ti.done FROM %s ti INNER JOIN %s li on li.item_id = ti.id
-							INNER JOIN %s ul on ul.list_id = li.list_id WHERE ti.item_id = $1 AND ul.user_id = $2`,
+	query := fmt.Sprintf(`SELECT ti.id, ti.title, ti.description, ti.done FROM %s ti INNER JOIN %s li on li.item_id = ti.id
+							INNER JOIN %s ul on ul.list_id = li.list_id WHERE ti.id = $1 AND ul.user_id = $2`,
 		todoItemsTable, listsItemsTable, usersListsTable)
 
 	if err := r.db.Get(&item, query, itemId, userId); err != nil {
