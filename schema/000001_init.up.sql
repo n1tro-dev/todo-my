@@ -15,9 +15,9 @@ CREATE TABLE todo_lists
 
 CREATE TABLE users_lists
 (
-    id serial primary key,
     user_id int references users(id) on delete cascade not null,
-    list_id int references todo_lists(id) on delete cascade not null
+    list_id int references todo_lists(id) on delete cascade not null,
+    primary key (user_id, list_id)
 );
 
 CREATE TABLE todo_items
@@ -30,7 +30,7 @@ CREATE TABLE todo_items
 
 CREATE TABLE lists_items
 (
-    id serial primary key,
     item_id int references todo_items(id) on delete cascade not null,
-    list_id int references todo_lists(id) on delete cascade not null
+    list_id int references todo_lists(id) on delete cascade not null,
+    primary key (item_id, list_id)
 );
